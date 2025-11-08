@@ -1,0 +1,45 @@
+# ============================
+# IDE / Editor
+# ============================
+.idea/
+.vscode/
+*.iml
+
+# ============================
+# Python
+# ============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.tmp
+
+# ============================
+# Data / Dumps (local only)
+# ============================
+data-processing/ol_dump_*.txt
+data-processing/ol_dump_*.txt.gz
+data-processing/ol_dump_authors_*.*
+data-processing/ol_dump_works_*.*
+data-processing/ol_ratings_dump*.*
+data-processing/results/
+
+data-processing/books_english_100k.jsonl
+data-processing/books_english_*.jsonl.tmp
+
+# ============================
+# Terraform
+# ============================
+infrastructure/.terraform/
+infrastructure/terraform.tfstate
+infrastructure/terraform.tfstate.backup
+terraform.tfstate
+terraform.tfstate.backup
+
+# ============================
+# Mac / OS
+# ============================
+.DS_Store
+Thumbs.db
+Icon?
