@@ -1,0 +1,31 @@
+# Ignore VCS
+.git
+.gitignore
+
+# macOS
+.DS_Store
+
+# IDE/editor files
+.vscode
+.idea
+
+# Generic build artifacts
+dist
+build
+tmp
+.cache
+
+# Go build/test artifacts
+*.exe
+*.out
+*.test
+*.log
+bin/
+out/
+
+# Node stuff (if any subfolders have UI)
+node_modules
+
+# Docker meta
+Dockerfile.*
+docker-compose.*
