@@ -1,65 +1,23 @@
-version: "3.9"
-
+version: '3.8'
 services:
-  # Redis cache for future Cache-Aside experiments.
-  # Exposed on 6379 (host) and reachable inside the compose network via "redis:6379".
+  recommendation:
+    build: .
+    container_name: recommendation
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - dynamodb
   redis:
     image: redis:7-alpine
     container_name: redis
-    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  # Search API service (port 8080)
-  search-api:
-    build:
-      context: ./services/search-api
-      dockerfile: Dockerfile
-    image: local/search-api:dev
-    container_name: search-api
-    environment:
-      - GIN_MODE=release
-      # Reserved for future Redis integration in your Go code:
-      - REDIS_URL=redis:6379
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
     ports:
-      - "8080:8080"
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  # Book Detail API service (port 8081)
-  bookdetail-api:
-    build:
-      context: ./services/bookdetail-api
-      dockerfile: Dockerfile
-    image: local/bookdetail-api:dev
-    container_name: bookdetail-api
-    environment:
-      - GIN_MODE=release
-      # Reserved for future Redis integration in your Go code:
-      - REDIS_URL=redis:6379
-    ports:
-      - "8081:8081"
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-volumes:
-  redis-data:
+      - "8001:8000"
+    command: "-jar DynamoDBLocal.jar -inMemory -sharedDb"
