@@ -1,18 +1,1 @@
-Recommendation Service
-======================
-
-Run locally:
-1. Create .env with AWS_REGION and DYNAMODB_TABLE and REDIS_URL (default in docker-compose).
-2. docker-compose up --build
-3. Visit http://localhost:8000/docs for interactive API.
-
-DynamoDB Local:
-- The docker compose runs dynamodb-local on port 8001.
-- You must create the ratings table (see README section below).
-
-Creating DynamoDB table (local) example:
-aws --endpoint-url http://localhost:8001 dynamodb create-table \
-  --table-name book_ratings \
-  --attribute-definitions AttributeName=work_id,AttributeType=S AttributeName=user_id,AttributeType=S \
-  --key-schema AttributeName=work_id,KeyType=HASH AttributeName=user_id,KeyType=RANGE \
-  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+My part is the Recommendation API. It’s a Python FastAPI microservice that fetches user ratings from the database, computes personalized book recommendations using collaborative filtering, and caches results in Redis for fast responses. The service is fully containerized with Docker, uses async operations for efficiency, and integrates smoothly with the rest of the distributed system.
