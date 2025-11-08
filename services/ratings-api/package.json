@@ -1,0 +1,14 @@
+{
+  "name": "ratings-api",
+  "version": "1.0.0",
+  "description": "API for book ratings",
+  "main": "cmd/api/main.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node cmd/api/main.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
