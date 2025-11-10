@@ -151,7 +151,53 @@ resource "aws_lb_listener_rule" "search_api" {
   }
 }
 
-# Book Detail API routing
+# Ratings API routing - Book ratings endpoints (higher priority to match first)
+resource "aws_lb_listener_rule" "ratings_api_books" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 150
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ratings_api.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/books/*/rate", "/books/*/ratings"]
+    }
+  }
+
+  tags = {
+    Name        = "${var.project_name}-ratings-api-books-rule"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Ratings API routing - User ratings endpoints
+resource "aws_lb_listener_rule" "ratings_api_users" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 160
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ratings_api.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/users/*"]
+    }
+  }
+
+  tags = {
+    Name        = "${var.project_name}-ratings-api-users-rule"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Book Detail API routing (lower priority so ratings rules match first)
 resource "aws_lb_listener_rule" "bookdetail_api" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 200
@@ -169,29 +215,6 @@ resource "aws_lb_listener_rule" "bookdetail_api" {
 
   tags = {
     Name        = "${var.project_name}-bookdetail-api-rule"
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-# Ratings API routing
-resource "aws_lb_listener_rule" "ratings_api" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 300
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ratings_api.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/users/*"]
-    }
-  }
-
-  tags = {
-    Name        = "${var.project_name}-ratings-api-rule"
     Environment = var.environment
     Project     = var.project_name
   }
