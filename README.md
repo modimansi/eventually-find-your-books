@@ -670,17 +670,6 @@ This project is part of an academic assignment for Northeastern University.
 
 ---
 
-## 🔗 Additional Resources
-
-- **Architecture Diagram:** See [DATA_ARCHITECTURE.md](DATA_ARCHITECTURE.md)
-- **API Reference:** See [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
-- **Load Testing:** See [loadtest/README.md](loadtest/README.md)
-- **Redis Setup:** See [REDIS_SETUP.md](REDIS_SETUP.md)
-- **Terraform Docs:** [terraform.io/docs](https://www.terraform.io/docs)
-- **AWS ECS:** [aws.amazon.com/ecs](https://aws.amazon.com/ecs/)
-
----
-
 ## 📞 Support
 
 For issues or questions:
