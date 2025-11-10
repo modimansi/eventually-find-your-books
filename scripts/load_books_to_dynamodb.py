@@ -14,7 +14,7 @@ Make sure your AWS credentials & region are configured (env vars or ~/.aws).
 import argparse
 import json
 from decimal import Decimal
-from typing import Iterator
+from typing import Iterator, Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -38,7 +38,7 @@ def iter_jsonl(path: str) -> Iterator[dict]:
                 continue
 
 
-def load_books(file_path: str, table_name: str, region: str | None = None):
+def load_books(file_path: str, table_name: str, region: Optional[str] = None):
     """
     Load books from JSONL file into DynamoDB using BatchWrite (25 items per request).
     """

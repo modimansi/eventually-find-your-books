@@ -10,16 +10,16 @@ type memStore struct {
 func NewMemStore() Store {
 	return &memStore{
 		data: map[string]BookDTO{
-			"OL1000046W": {WorkID: "OL1000046W", Title: "The Great Gatsby", Authors: []string{"F. Scott Fitzgerald"}},
-			"OL2000001W": {WorkID: "OL2000001W", Title: "Harry Potter and the Sorcerer's Stone", Authors: []string{"J. K. Rowling"}},
-			"OL3000002W": {WorkID: "OL3000002W", Title: "Hamlet", Authors: []string{"William Shakespeare"}},
-			"OL4000003W": {WorkID: "OL4000003W", Title: "Clean Architecture", Authors: []string{"Robert C. Martin"}},
+			"OL1000046W": {BookID: "OL1000046W", Title: "The Great Gatsby", Authors: []string{"F. Scott Fitzgerald"}},
+			"OL2000001W": {BookID: "OL2000001W", Title: "Harry Potter and the Sorcerer's Stone", Authors: []string{"J. K. Rowling"}},
+			"OL3000002W": {BookID: "OL3000002W", Title: "Hamlet", Authors: []string{"William Shakespeare"}},
+			"OL4000003W": {BookID: "OL4000003W", Title: "Clean Architecture", Authors: []string{"Robert C. Martin"}},
 		},
 	}
 }
 
 func (m *memStore) GetOne(id string) (BookDTO, bool, error) {
-	// TODO: Implement DB read here in a real store (key lookup by work_id).
+	// TODO: Implement DB read here in a real store (key lookup by book_id).
 	b, ok := m.data[id]
 	return b, ok, nil
 }

@@ -31,7 +31,7 @@ type AdvancedReq struct {
 }
 
 type BookDTO struct {
-	WorkID  string   `json:"work_id"`
+	BookID  string   `json:"book_id"`
 	Title   string   `json:"title"`
 	Authors []string `json:"authors"`
 	// TODO: Add more fields (subjects, description, etc.) once the database schema is finalized.
@@ -106,15 +106,24 @@ func (h *Handler) GetShard(c *gin.Context) {
 // Helper functions
 // =============================
 
-func defLimit(n int) int { if n <= 0 { return 20 }; return n }
+func defLimit(n int) int {
+	if n <= 0 {
+		return 20
+	}
+	return n
+}
 
 func parseLimit(s string, d int) int {
 	n := 0
 	for _, r := range s {
-		if r < '0' || r > '9' { return d }
+		if r < '0' || r > '9' {
+			return d
+		}
 		n = n*10 + int(r-'0')
 	}
-	if n <= 0 { return d }
+	if n <= 0 {
+		return d
+	}
 	return n
 }
 

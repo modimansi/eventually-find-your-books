@@ -17,14 +17,14 @@ func NewHandler(s Store) *Handler { return &Handler{store: s} }
 // =============================
 
 type BookDTO struct {
-	WorkID  string   `json:"work_id"`
+	BookID  string   `json:"book_id"`
 	Title   string   `json:"title"`
 	Authors []string `json:"authors"`
 	// TODO: Add more fields (subjects, description, covers, etc.) once schema is finalized.
 }
 
 type BatchIn struct {
-	WorkIDs []string `json:"work_ids" binding:"required"`
+	BookIDs []string `json:"book_ids" binding:"required"`
 }
 
 // =============================
@@ -40,11 +40,11 @@ type Store interface {
 // Handlers
 // =============================
 
-// GET /books/:work_id
+// GET /books/:book_id
 func (h *Handler) GetOne(c *gin.Context) {
-	id := c.Param("work_id")
+	id := c.Param("book_id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, errJSON("invalid_id", "work_id is required"))
+		c.JSON(http.StatusBadRequest, errJSON("invalid_id", "book_id is required"))
 		return
 	}
 	item, ok, err := h.store.GetOne(id)
@@ -62,11 +62,11 @@ func (h *Handler) GetOne(c *gin.Context) {
 // POST /books/batch
 func (h *Handler) PostBatch(c *gin.Context) {
 	var req BatchIn
-	if err := c.ShouldBindJSON(&req); err != nil || len(req.WorkIDs) == 0 {
-		c.JSON(http.StatusBadRequest, errJSON("invalid_request", "work_ids is required"))
+	if err := c.ShouldBindJSON(&req); err != nil || len(req.BookIDs) == 0 {
+		c.JSON(http.StatusBadRequest, errJSON("invalid_request", "book_ids is required"))
 		return
 	}
-	items, err := h.store.GetBatch(req.WorkIDs)
+	items, err := h.store.GetBatch(req.BookIDs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errJSON("internal_error", err.Error()))
 		return

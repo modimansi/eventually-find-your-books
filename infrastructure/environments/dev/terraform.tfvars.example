@@ -1,0 +1,37 @@
+# Example Terraform variables file for development environment
+# Copy this file to terraform.tfvars and customize as needed
+
+# Project configuration
+project_name = "book-recommendation"
+environment  = "dev"
+aws_region   = "us-west-2"
+
+# Network configuration
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-west-2a", "us-west-2b"]
+
+# Service ports
+search_api_port      = 8080
+bookdetail_api_port  = 8081
+ratings_api_port     = 3000
+
+# ECS task resources (CPU in units, Memory in MB)
+# 256 CPU = 0.25 vCPU, 512 CPU = 0.5 vCPU, 1024 CPU = 1 vCPU
+
+# Search API
+search_api_cpu    = 512
+search_api_memory = 1024
+
+# Book Detail API
+bookdetail_api_cpu    = 512
+bookdetail_api_memory = 1024
+
+# Ratings API
+ratings_api_cpu    = 256
+ratings_api_memory = 512
+
+# Desired task count (number of instances per service)
+search_api_desired_count      = 2
+bookdetail_api_desired_count  = 2
+ratings_api_desired_count     = 2
+

@@ -11,10 +11,10 @@ type memStore struct {
 func NewMemStore() Store {
 	return &memStore{
 		data: []BookDTO{
-			{WorkID: "OL1000046W", Title: "The Great Gatsby", Authors: []string{"F. Scott Fitzgerald"}},
-			{WorkID: "OL2000001W", Title: "Harry Potter and the Sorcerer's Stone", Authors: []string{"J.K. Rowling"}},
-			{WorkID: "OL3000002W", Title: "Hamlet", Authors: []string{"William Shakespeare"}},
-			{WorkID: "OL4000003W", Title: "Clean Architecture", Authors: []string{"Robert C. Martin"}},
+			{BookID: "OL1000046W", Title: "The Great Gatsby", Authors: []string{"F. Scott Fitzgerald"}},
+			{BookID: "OL2000001W", Title: "Harry Potter and the Sorcerer's Stone", Authors: []string{"J.K. Rowling"}},
+			{BookID: "OL3000002W", Title: "Hamlet", Authors: []string{"William Shakespeare"}},
+			{BookID: "OL4000003W", Title: "Clean Architecture", Authors: []string{"Robert C. Martin"}},
 		},
 	}
 }
@@ -27,7 +27,9 @@ func (m *memStore) Search(q string, limit int) ([]BookDTO, error) {
 	for _, b := range m.data {
 		if containsFold(b.Title, q) || anyAuthorMatch(b.Authors, q) {
 			out = append(out, b)
-			if len(out) == limit { break }
+			if len(out) == limit {
+				break
+			}
 		}
 	}
 	return out, nil
@@ -43,7 +45,9 @@ func (m *memStore) SearchAdvanced(title, author string, subjects []string, limit
 		if (title == "" || containsFold(b.Title, title)) &&
 			(author == "" || anyAuthorMatch(b.Authors, author)) {
 			out = append(out, b)
-			if len(out) == limit { break }
+			if len(out) == limit {
+				break
+			}
 		}
 	}
 	return out, nil
@@ -62,7 +66,9 @@ func (m *memStore) SearchShard(prefix, q string, limit int) ([]BookDTO, error) {
 		}
 		if first == p && (q == "" || containsFold(b.Title, q) || anyAuthorMatch(b.Authors, q)) {
 			out = append(out, b)
-			if len(out) == limit { break }
+			if len(out) == limit {
+				break
+			}
 		}
 	}
 	return out, nil
@@ -77,9 +83,13 @@ func containsFold(s, sub string) bool { return strings.Contains(strings.ToLower(
 
 // Checks if any author name matches the search term
 func anyAuthorMatch(authors []string, needle string) bool {
-	if needle == "" { return true }
+	if needle == "" {
+		return true
+	}
 	for _, a := range authors {
-		if containsFold(a, needle) { return true }
+		if containsFold(a, needle) {
+			return true
+		}
 	}
 	return false
 }

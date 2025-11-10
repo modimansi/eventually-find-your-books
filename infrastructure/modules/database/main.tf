@@ -1,9 +1,10 @@
 ########################################
-# DynamoDB: Books table
+# DynamoDB Tables Module
 ########################################
 
+# Books Table
 resource "aws_dynamodb_table" "books" {
-  name         = "Books"
+  name         = "${var.project_name}-books-${var.environment}"
   billing_mode = "PAY_PER_REQUEST"
 
   # Primary key: book_id
@@ -30,7 +31,7 @@ resource "aws_dynamodb_table" "books" {
     name               = "TitleLowerIndex"
     hash_key           = "title_lower"
     projection_type    = "ALL"
-    read_capacity      = 0   # Required when using on-demand billing
+    read_capacity      = 0
     write_capacity     = 0
   }
 
@@ -43,29 +44,24 @@ resource "aws_dynamodb_table" "books" {
     write_capacity     = 0
   }
 
-  # Optional: Enable point-in-time recovery for safety
   point_in_time_recovery {
     enabled = true
   }
 
-  # Enable server-side encryption (recommended)
   server_side_encryption {
     enabled = true
   }
 
   tags = {
-    Name        = "Books"
-    Environment = "dev"
-    Project     = "cs6650-final"
+    Name        = "${var.project_name}-books"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
-########################################
-# DynamoDB: Ratings table
-########################################
-
+# Ratings Table
 resource "aws_dynamodb_table" "ratings" {
-  name         = "Ratings"
+  name         = "${var.project_name}-ratings-${var.environment}"
   billing_mode = "PAY_PER_REQUEST"
 
   # Primary key: user_id + book_id
@@ -100,18 +96,15 @@ resource "aws_dynamodb_table" "ratings" {
   }
 
   tags = {
-    Name        = "Ratings"
-    Environment = "dev"
-    Project     = "cs6650-final"
+    Name        = "${var.project_name}-ratings"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
-########################################
-# DynamoDB: UserProfiles table
-########################################
-
+# UserProfiles Table
 resource "aws_dynamodb_table" "user_profiles" {
-  name         = "UserProfiles"
+  name         = "${var.project_name}-user-profiles-${var.environment}"
   billing_mode = "PAY_PER_REQUEST"
 
   # Primary key: user_id
@@ -122,8 +115,6 @@ resource "aws_dynamodb_table" "user_profiles" {
     type = "S"
   }
 
-  # No GSIs for now — can add username-based index later if needed
-
   point_in_time_recovery {
     enabled = true
   }
@@ -133,8 +124,9 @@ resource "aws_dynamodb_table" "user_profiles" {
   }
 
   tags = {
-    Name        = "UserProfiles"
-    Environment = "dev"
-    Project     = "cs6650-final"
+    Name        = "${var.project_name}-user-profiles"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
+

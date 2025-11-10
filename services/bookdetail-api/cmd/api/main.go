@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/gin-gonic/gin"
 	"bookdetail-api/internal/bookdetail"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 	h := bookdetail.NewHandler(store)
 
 	// Register routes.
-	r.GET("/books/:work_id", h.GetOne)
+	r.GET("/books/:book_id", h.GetOne)
 	r.POST("/books/batch", h.PostBatch)
 
 	// Health check endpoint.
