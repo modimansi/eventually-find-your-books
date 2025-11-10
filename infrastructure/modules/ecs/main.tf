@@ -84,14 +84,6 @@ resource "aws_ecs_task_definition" "search_api" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-
-      healthCheck = {
-        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${var.search_api_port}/healthz || exit 1"]
-        interval    = 30
-        timeout     = 5
-        retries     = 3
-        startPeriod = 60
-      }
     }
   ])
 
@@ -183,14 +175,6 @@ resource "aws_ecs_task_definition" "bookdetail_api" {
           "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
-      }
-
-      healthCheck = {
-        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${var.bookdetail_api_port}/healthz || exit 1"]
-        interval    = 30
-        timeout     = 5
-        retries     = 3
-        startPeriod = 60
       }
     }
   ])
