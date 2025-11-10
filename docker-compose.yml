@@ -1,23 +1,44 @@
 version: '3.8'
+
 services:
-  recommendation:
-    build: .
-    container_name: recommendation
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - dynamodb
+  # Redis cache for Recommendation API
   redis:
     image: redis:7-alpine
-    container_name: redis
+    container_name: book-redis
     ports:
       - "6379:6379"
-  dynamodb:
-    image: amazon/dynamodb-local
-    container_name: dynamodb-local
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Recommendation API (Python FastAPI)
+  recommendation-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.recommendation
+    container_name: book-recommendation-api
     ports:
-      - "8001:8000"
-    command: "-jar DynamoDBLocal.jar -inMemory -sharedDb"
+      - "8000:8000"
+    environment:
+      - AWS_REGION=us-west-2
+      - DYNAMODB_TABLE_RATINGS=book-recommendation-ratings-dev
+      - REDIS_URL=redis://redis:6379/0
+      - CACHE_TTL_SECONDS=600
+      - DEBUG=true
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./app:/app/app:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  redis_data:
+    driver: local

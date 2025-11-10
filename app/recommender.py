@@ -5,7 +5,7 @@ from collections import defaultdict
 def build_matrix(ratings: List[Dict]):
     """
     Build user x item rating matrix and mappings.
-    ratings: list of items with keys: user_id, work_id, rating
+    ratings: list of items with keys: user_id, book_id, rating
     """
     users = {}
     items = {}
@@ -14,7 +14,7 @@ def build_matrix(ratings: List[Dict]):
 
     for r in ratings:
         u = r['user_id']
-        i = r['work_id']
+        i = r['book_id']
         if u not in users:
             users[u] = user_idx; user_idx += 1
         if i not in items:
@@ -22,7 +22,7 @@ def build_matrix(ratings: List[Dict]):
 
     mat = np.zeros((len(users), len(items)), dtype=float)
     for r in ratings:
-        mat[users[r['user_id']], items[r['work_id']]] = float(r['rating'])
+        mat[users[r['user_id']], items[r['book_id']]] = float(r['rating'])
     return mat, users, items
 
 def cosine_similarity_matrix(mat: np.ndarray):
@@ -34,7 +34,7 @@ def cosine_similarity_matrix(mat: np.ndarray):
     return sim
 
 def recommend_for_user(target_user: str, ratings: List[Dict], top_k=10) -> List[str]:
-    """Return list of work_ids recommended for target_user."""
+    """Return list of book_ids recommended for target_user."""
     if not ratings:
         return []
 
@@ -68,9 +68,9 @@ def most_popular_items(ratings: List[Dict], top_k=10) -> List[str]:
     counts = {}
     sum_r = {}
     for r in ratings:
-        w = r['work_id']
-        counts[w] = counts.get(w, 0) + 1
-        sum_r[w] = sum_r.get(w, 0) + float(r['rating'])
+        b = r['book_id']
+        counts[b] = counts.get(b, 0) + 1
+        sum_r[b] = sum_r.get(b, 0) + float(r['rating'])
     # sort by count then avg rating
-    items = sorted(counts.keys(), key=lambda w: (-counts[w], -sum_r[w]/counts[w]))
+    items = sorted(counts.keys(), key=lambda b: (-counts[b], -sum_r[b]/counts[b]))
     return items[:top_k]

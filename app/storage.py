@@ -6,7 +6,7 @@ from app.config import settings
 # Use boto3 client/resource (sync). We can call it from async endpoints via threadpool.
 session = boto3.Session(region_name=settings.aws_region)
 dynamodb = session.resource('dynamodb')
-table = dynamodb.Table(settings.dynamodb_table)
+table = dynamodb.Table(settings.dynamodb_table_ratings)
 
 def fetch_all_ratings() -> List[Dict]:
     """Scan DynamoDB table and return all items (simple for demo)."""
