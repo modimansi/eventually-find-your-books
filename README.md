@@ -388,8 +388,6 @@ curl "http://localhost:8000/recommendations/alice?limit=5"
 curl -X POST "http://localhost:8000/recommendations/refresh"
 ```
 
-**Complete API documentation:** See [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
-
 ---
 
 ## 🧪 Load Testing
@@ -439,28 +437,26 @@ locust -f locustfile.py \
 | **Stress Test** | 200 | 20/sec | 10 min | Find limits |
 | **Spike Test** | 500 | 100/sec | 3 min | Traffic surge |
 
-**Complete guide:** See [loadtest/README.md](loadtest/README.md)
-
 ---
 
 ## 👥 Team Contributions
 
-### Mansi - Infrastructure Architect & DevOps Lead
+### Mansi
 - Developed Ratings API (Node.js/Express) with DynamoDB integration for user-book rating operations
 - Architected complete AWS infrastructure using Terraform (ECS, ALB, DynamoDB, VPC) deploying multi-language microservices
 - Debugged critical production issues: Docker compatibility, ECS health checks, ALB routing conflicts, AWS Academy IAM limitations
 
-### Martin - Backend Services Engineer
+### Martin
 - Built two Go microservices: Search API (basic/advanced/shard search) and Book Detail API (single/batch retrieval)
 - Implemented dual-store pattern (in-memory dev, DynamoDB prod) with health checks and efficient query patterns
 - Standardized data model migration from `work_id` to `book_id` across all services
 
-### Snahil - ML/AI Engineer & QA Lead
+### Snahil
 - Developed collaborative filtering recommendation engine (Python/FastAPI) using user-user cosine similarity with NumPy
 - Integrated Redis caching layer reducing recommendation latency from 2-5 seconds to <50ms (99% improvement)
 - Designed and executed Locust load tests identifying DynamoDB Scans as primary bottleneck (p95: 1700ms)
 
-### Theodore - Data Engineer & Database Architect
+### Theodore
 - Built ETL pipeline processing 50K+ Open Library books with validation, cleaning, and ratings enrichment
 - Designed DynamoDB schema (books/ratings tables) using Terraform with optimized partition keys for sharding
 - Created Python batch-loading script for JSONL data import with error handling and rate limit management
