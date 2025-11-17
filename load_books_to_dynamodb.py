@@ -3,10 +3,10 @@ Batch load books JSONL into DynamoDB Books table.
 
 Usage example:
 
-  python3 load_books_to_dynamodb.py \
-    --file ../Data_process/books_english_top50k_with_ratings.jsonl \
+  python3 data-processing/load_books_to_dynamodb.py \
+    --file data-process/books_english_top50k_with_ratings.jsonl \
     --table Books \
-    --region us-east-1
+    --region us-west-2
 
 Make sure your AWS credentials & region are configured (env vars or ~/.aws).
 """
