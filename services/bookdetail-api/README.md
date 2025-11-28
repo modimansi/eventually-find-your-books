@@ -35,8 +35,8 @@ Key features:
 
 | Method | Endpoint | Purpose | Example |
 |--------|-----------|----------|----------|
-| GET | `/books/{work_id}` | Get details for a single book | `/books/OL1000046W` |
-| POST | `/books/batch` | Get multiple books by ID list | `{"work_ids": ["OL1000046W", "OL3000002W"]}` |
+| GET | `/books/{book_id}` | Get details for a single book | `/books/OL1000046W` |
+| POST | `/books/batch` | Get multiple books by ID list | `{"book_ids": ["OL1000046W", "OL3000002W"]}` |
 | GET | `/healthz` | Health check | — |
 
 ---
@@ -51,7 +51,7 @@ Batch request:
 
     curl -s -X POST http://localhost:8081/books/batch \
       -H "Content-Type: application/json" \
-      -d '{"work_ids": ["OL1000046W", "OL3000002W"]}'
+      -d '{"book_ids": ["OL1000046W", "OL3000002W"]}'
 
 Health check:
 
@@ -68,7 +68,7 @@ Health check:
 - Returns structured JSON objects following the `BookDTO` format:
   ```json
   {
-    "work_id": "OL1000046W",
+    "book_id": "OL1000046W",
     "title": "The Great Gatsby",
     "authors": ["F. Scott Fitzgerald"]
   }

@@ -4,9 +4,10 @@ This API allows users to rate books, retrieve all ratings for a book, and get a 
 
 ## Endpoints
 
-- `POST /books/{work_id}/rate`: Rate a book (1-5 stars) with `{ "user_id": "user_001", "rating": 5 }`.
-- `GET /books/{work_id}/ratings`: Get all ratings for a specific book.
+- `POST /books/{book_id}/rate`: Rate a book (1-5 stars) with `{ "user_id": "user_001", "rating": 5 }`.
+- `GET /books/{book_id}/ratings`: Get all ratings for a specific book.
 - `GET /users/{user_id}/ratings`: Get the rating history of a specific user.
+- `GET /healthz`: Health check endpoint (returns 200 OK).
 
 ## Setup
 
