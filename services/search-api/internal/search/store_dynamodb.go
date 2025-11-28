@@ -35,10 +35,14 @@ func NewDynamoStore(tableName string) (Store, error) {
 
 // Book represents the full DynamoDB book structure
 type Book struct {
-	BookID           string   `dynamodbav:"book_id"`
-	Title            string   `dynamodbav:"title"`
-	TitleLower       string   `dynamodbav:"title_lower"`
-	TitlePrefix      string   `dynamodbav:"title_prefix"`
+	BookID      string   `dynamodbav:"book_id"`
+	Title       string   `dynamodbav:"title"`
+	TitleLower  string   `dynamodbav:"title_lower"`
+	TitlePrefix string   `dynamodbav:"title_prefix"`
+
+	// NEW: composite shard key (T1, A2, I-M, R-U, etc.)
+	ShardKey string `dynamodbav:"shard_key"` // NEW FIELD
+
 	Authors          []Author `dynamodbav:"authors"`
 	ISBN13           []string `dynamodbav:"isbn_13"`
 	FirstPublishYear *int     `dynamodbav:"first_publish_year"`
@@ -69,47 +73,73 @@ func (b *Book) ToDTO() BookDTO {
 	}
 }
 
-// Search performs a scan with filter (not ideal for production, but works for small datasets)
+// ============================================================================
+// Basic search: full table scan + in-memory filter.
+// OK for ~50k items and keeps behaviour simple and correct.
+// ============================================================================
+
 func (d *dynamoStore) Search(query string, limit int) ([]BookDTO, error) {
-	ctx := context.TODO()
+    ctx := context.TODO()
 
-	// For better performance, use Query with TitleLowerIndex GSI
-	// For now, we'll do a simple scan with filter
-	q := strings.ToLower(query)
+    q := strings.ToLower(strings.TrimSpace(query))
+    if q == "" {
+        return []BookDTO{}, nil
+    }
+    if limit <= 0 {
+        limit = 20
+    }
 
-	input := &dynamodb.ScanInput{
-		TableName: aws.String(d.tableName),
-		Limit:     aws.Int32(int32(limit * 3)), // Get more items to filter
-	}
+    out := make([]BookDTO, 0, limit)
+    var lastKey map[string]types.AttributeValue
 
-	result, err := d.client.Scan(ctx, input)
-	if err != nil {
-		return nil, fmt.Errorf("failed to scan table: %w", err)
-	}
+    for {
+        input := &dynamodb.ScanInput{
+            TableName: aws.String(d.tableName),
+        }
+        if lastKey != nil {
+            input.ExclusiveStartKey = lastKey
+        }
 
-	books := []Book{}
-	err = attributevalue.UnmarshalListOfMaps(result.Items, &books)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
-	}
+        result, err := d.client.Scan(ctx, input)
+        if err != nil {
+            return nil, fmt.Errorf("failed to scan table: %w", err)
+        }
 
-	// Filter in memory (for simplicity)
-	out := make([]BookDTO, 0, limit)
-	for _, b := range books {
-		authorNames := make([]string, len(b.Authors))
-		for i, a := range b.Authors {
-			authorNames[i] = a.AuthorName
-		}
-		if containsFold(b.Title, q) || anyAuthorMatch(authorNames, q) {
-			out = append(out, b.ToDTO())
-			if len(out) >= limit {
-				break
-			}
-		}
-	}
+        if len(result.Items) == 0 {
+            break
+        }
 
-	return out, nil
+        books := []Book{}
+        if err := attributevalue.UnmarshalListOfMaps(result.Items, &books); err != nil {
+            return nil, fmt.Errorf("failed to unmarshal items: %w", err)
+        }
+
+        for _, b := range books {
+            authorNames := make([]string, len(b.Authors))
+            for i, a := range b.Authors {
+                authorNames[i] = a.AuthorName
+            }
+
+            if containsFold(b.Title, q) || anyAuthorMatch(authorNames, q) {
+                out = append(out, b.ToDTO())
+                if len(out) >= limit {
+                    return out, nil
+                }
+            }
+        }
+
+        if len(result.LastEvaluatedKey) == 0 {
+            break
+        }
+        lastKey = result.LastEvaluatedKey
+    }
+
+    return out, nil
 }
+
+// ============================================================================
+// Advanced search: Scan + in-memory filter (your original logic)
+// ============================================================================
 
 // SearchAdvanced performs advanced search
 func (d *dynamoStore) SearchAdvanced(title, author string, subjects []string, limit int) ([]BookDTO, error) {
@@ -126,8 +156,7 @@ func (d *dynamoStore) SearchAdvanced(title, author string, subjects []string, li
 	}
 
 	books := []Book{}
-	err = attributevalue.UnmarshalListOfMaps(result.Items, &books)
-	if err != nil {
+	if err := attributevalue.UnmarshalListOfMaps(result.Items, &books); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
 	}
 
@@ -153,7 +182,11 @@ func (d *dynamoStore) SearchAdvanced(title, author string, subjects []string, li
 	return out, nil
 }
 
-// SearchShard searches by title prefix using GSI
+// ============================================================================
+// Old sharding: /search/shard/{prefix} using single-letter TitlePrefixIndex
+// ============================================================================
+
+// SearchShard searches by title prefix using GSI (single-letter shard: A–Z)
 func (d *dynamoStore) SearchShard(prefix, query string, limit int) ([]BookDTO, error) {
 	ctx := context.TODO()
 
@@ -176,12 +209,11 @@ func (d *dynamoStore) SearchShard(prefix, query string, limit int) ([]BookDTO, e
 	}
 
 	books := []Book{}
-	err = attributevalue.UnmarshalListOfMaps(result.Items, &books)
-	if err != nil {
+	if err := attributevalue.UnmarshalListOfMaps(result.Items, &books); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
 	}
 
-	// Filter by query if provided
+	// Filter by query if provided (same logic as basic search)
 	q := strings.ToLower(query)
 	out := make([]BookDTO, 0, limit)
 	for _, b := range books {
@@ -194,6 +226,64 @@ func (d *dynamoStore) SearchShard(prefix, query string, limit int) ([]BookDTO, e
 			if len(out) >= limit {
 				break
 			}
+		}
+	}
+
+	return out, nil
+}
+
+// ============================================================================
+// NEW: Composite sharding: /search/shard/{shardKey} using ShardIndex
+// ============================================================================
+
+// SearchByShard queries books within a composite shard (shard_key)
+// and optionally filters by a substring of title_lower.
+func (d *dynamoStore) SearchByShard(shardKey, query string, limit int) ([]BookDTO, error) {
+	ctx := context.TODO()
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	// Base query on ShardIndex
+	exprValues := map[string]types.AttributeValue{
+		":sk": &types.AttributeValueMemberS{Value: shardKey},
+	}
+
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String(d.tableName),
+		IndexName:              aws.String("ShardIndex"), // NEW GSI name
+		KeyConditionExpression: aws.String("shard_key = :sk"),
+		ExpressionAttributeValues: exprValues,
+		Limit: aws.Int32(int32(limit * 2)),
+	}
+
+	// Optional filter on title_lower
+	if query != "" {
+		q := strings.ToLower(query)
+		input.FilterExpression = aws.String("contains(title_lower, :q)")
+		exprValues[":q"] = &types.AttributeValueMemberS{Value: q}
+	}
+
+	result, err := d.client.Query(ctx, input)
+	if err != nil {
+		return nil, fmt.Errorf("query shard %s: %w", shardKey, err)
+	}
+
+	if len(result.Items) == 0 {
+		return []BookDTO{}, nil
+	}
+
+	books := []Book{}
+	if err := attributevalue.UnmarshalListOfMaps(result.Items, &books); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal shard items: %w", err)
+	}
+
+	out := make([]BookDTO, 0, limit)
+	for _, b := range books {
+		out = append(out, b.ToDTO())
+		if len(out) >= limit {
+			break
 		}
 	}
 

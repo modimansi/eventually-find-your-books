@@ -34,18 +34,19 @@ type BookDTO struct {
 	BookID  string   `json:"book_id"`
 	Title   string   `json:"title"`
 	Authors []string `json:"authors"`
-	// TODO: Add more fields (subjects, description, etc.) once the database schema is finalized.
 }
 
 // =============================
 // Store Interface
 // =============================
-// This defines the persistence layer contract.
-// The handlers only depend on this interface, so the implementation can be swapped freely.
+// Add SearchByShard for composite sharding
 type Store interface {
 	Search(q string, limit int) ([]BookDTO, error)
 	SearchAdvanced(title, author string, subjects []string, limit int) ([]BookDTO, error)
 	SearchShard(prefix, q string, limit int) ([]BookDTO, error)
+
+	// NEW: composite shard search (shard_key)
+	SearchByShard(shardKey, q string, limit int) ([]BookDTO, error) // NEW
 }
 
 // =============================
@@ -84,6 +85,11 @@ func (h *Handler) PostAdvanced(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": len(items), "items": items})
 }
 
+// =============================
+// OLD SHARDING: /search/shard/:prefix
+// (single letter A–Z)
+// =============================
+
 // GET /search/shard/:prefix
 func (h *Handler) GetShard(c *gin.Context) {
 	prefix := c.Param("prefix")
@@ -94,11 +100,39 @@ func (h *Handler) GetShard(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errJSON("invalid_prefix", "prefix must be a single letter"))
 		return
 	}
+
 	items, err := h.store.SearchShard(prefix, q, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errJSON("internal_error", err.Error()))
 		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{"count": len(items), "items": items})
+}
+
+// =============================
+// NEW: COMPOSITE SHARDING
+// e.g. /search/composite/T1
+//      /search/composite/I-M
+// =============================
+
+// GET /search/composite/:shard
+func (h *Handler) GetCompositeShard(c *gin.Context) {
+	shardKey := c.Param("shard")
+	q := c.Query("query")
+	limit := parseLimit(c.Query("limit"), 20)
+
+	if shardKey == "" {
+		c.JSON(http.StatusBadRequest, errJSON("invalid_shard", "shard key required"))
+		return
+	}
+
+	items, err := h.store.SearchByShard(shardKey, q, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errJSON("internal_error", err.Error()))
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"count": len(items), "items": items})
 }
 
