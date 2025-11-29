@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 boto3
 aioredis==2.0.1
-pydantic
+pydantic==1.10.13
 numpy
 scipy
 python-dotenv

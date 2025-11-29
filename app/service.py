@@ -20,17 +20,23 @@ async def get_recommendations(user_id: str, limit: int = 10):
     return recs
 
 async def refresh_all_recommendations():
-    # Compute and pre-warm cache for all users (example: compute top for each distinct user in ratings)
+    # Compute and pre-warm cache for all users
     ratings = storage.fetch_all_ratings()
-    users = set([r['user_id'] for r in ratings])
+    users = sorted({r['user_id'] for r in ratings if 'user_id' in r})
+    if not users:
+        return 0
     loop = asyncio.get_event_loop()
-    tasks = []
-    for u in users:
-        tasks.append(loop.run_in_executor(None, compute_recommendations_for_user_sync, u, 10))
+    tasks = [
+        loop.run_in_executor(None, compute_recommendations_for_user_sync, u, 10)
+        for u in users
+    ]
     results = await asyncio.gather(*tasks)
-    # set into cache
-    i = 0
-    for u in users:
-        await cache.set_cached_recommendations(u, results[i])
-        i += 1
+    for u, recs in zip(users, results):
+        await cache.set_cached_recommendations(u, recs)
     return len(users)
+
+async def invalidate_user_recommendations(user_id: str):
+    """
+    Invalidate cache for a single user (called after rating changes).
+    """
+    await cache.invalidate_user_cache(user_id)

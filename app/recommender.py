@@ -16,9 +16,11 @@ def build_matrix(ratings: List[Dict]):
         u = r['user_id']
         i = r['work_id']
         if u not in users:
-            users[u] = user_idx; user_idx += 1
+            users[u] = user_idx
+            user_idx += 1
         if i not in items:
-            items[i] = item_idx; item_idx += 1
+            items[i] = item_idx
+            item_idx += 1
 
     mat = np.zeros((len(users), len(items)), dtype=float)
     for r in ratings:

@@ -167,3 +167,16 @@ variable "ratings_api_desired_count" {
   type        = number
 }
 
+# Redis Cache
+variable "redis_endpoint" {
+  description = "Redis ElastiCache endpoint address"
+  type        = string
+  default     = ""
+}
+
+variable "redis_port" {
+  description = "Redis port"
+  type        = number
+  default     = 6379
+}
+

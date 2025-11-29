@@ -306,3 +306,95 @@ resource "aws_ecs_service" "ratings_api" {
   }
 }
 
+########################################
+# Recommendation API ECS Service
+########################################
+
+resource "aws_ecs_task_definition" "recommendation_api" {
+  family                   = "${var.project_name}-recommendation-api-${var.environment}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = var.task_execution_role_arn
+  task_role_arn            = var.task_role_arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "recommendation-api"
+      image     = "python:3.11-slim"
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = 8000
+          hostPort      = 8000
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "AWS_REGION"
+          value = var.aws_region
+        },
+        {
+          name  = "DYNAMODB_TABLE"
+          value = var.ratings_table_name
+        },
+        {
+          name  = "REDIS_URL"
+          value = "redis://${var.redis_endpoint}:${var.redis_port}/0"
+        },
+        {
+          name  = "CACHE_TTL_SECONDS"
+          value = "600"
+        },
+        {
+          name  = "DEBUG"
+          value = "false"
+        },
+        {
+          name  = "ENVIRONMENT"
+          value = var.environment
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.project_name}-recommendation-api-${var.environment}"
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-task"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+resource "aws_ecs_service" "recommendation_api" {
+  name            = "${var.project_name}-recommendation-api-${var.environment}"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.recommendation_api.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_tasks_security_group_id]
+    assign_public_ip = false
+  }
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-service"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+

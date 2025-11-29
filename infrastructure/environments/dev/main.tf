@@ -40,6 +40,18 @@ module "database" {
   environment  = var.environment
 }
 
+# Redis Cache (ElastiCache)
+module "cache" {
+  source = "../../modules/cache"
+
+  project_name                  = var.project_name
+  environment                   = var.environment
+  vpc_id                        = module.networking.vpc_id
+  private_subnet_ids            = module.networking.private_subnet_ids
+  ecs_tasks_security_group_id   = module.security.ecs_tasks_security_group_id
+  node_type                     = "cache.t3.micro"
+}
+
 # ECR Repositories
 module "ecr" {
   source = "../../modules/ecr"
@@ -117,6 +129,10 @@ module "ecs" {
   # DynamoDB
   books_table_name              = module.database.books_table_name
   ratings_table_name            = module.database.ratings_table_name
+  
+  # Redis Cache
+  redis_endpoint                = module.cache.redis_endpoint
+  redis_port                    = module.cache.redis_port
   
   # Service Configuration
   search_api_port               = var.search_api_port

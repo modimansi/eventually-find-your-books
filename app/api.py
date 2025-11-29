@@ -14,3 +14,12 @@ async def refresh_recommendations(background_tasks: BackgroundTasks):
     # Kick off background recompute
     background_tasks.add_task(service.refresh_all_recommendations)
     return {"status": "started"}
+
+@router.post("/recommendations/invalidate/{user_id}")
+async def invalidate_recommendations(user_id: str):
+    """
+    Invalidate cached recommendations for a user.
+    Call this from Ratings API after a successful rating write.
+    """
+    await service.invalidate_user_recommendations(user_id)
+    return {"status": "ok", "user_id": user_id}

@@ -13,7 +13,7 @@ async def get_redis():
 
 async def get_cached_recommendations(user_id: str):
     r = await get_redis()
-    key = f"reco:{user_id}"
+    key = f"reco:{user_id}"  # format: reco:<user_id>
     data = await r.get(key)
     if data:
         return json.loads(data)
