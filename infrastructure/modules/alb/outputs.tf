@@ -28,3 +28,8 @@ output "ratings_api_target_group_arn" {
   value       = aws_lb_target_group.ratings_api.arn
 }
 
+output "recommendation_api_target_group_arn" {
+  description = "ARN of the Recommendation API target group"
+  value       = aws_lb_target_group.recommendation_api.arn
+}
+

@@ -1,9 +1,20 @@
 import asyncio
 import json
 from app.config import settings
+from prometheus_client import Counter
 
 redis = None
 redis_available = True
+
+# Prometheus counters (process-level, aggregated across requests)
+cache_hits_counter = Counter(
+    "reco_cache_hits_total",
+    "Total number of recommendation cache hits"
+)
+cache_misses_counter = Counter(
+    "reco_cache_misses_total",
+    "Total number of recommendation cache misses"
+)
 
 async def get_redis():
     """Get Redis connection, or None if Redis is unavailable"""
@@ -51,7 +62,10 @@ async def get_cached_recommendations(user_id: str):
         key = f"reco:{user_id}"
         data = await r.get(key)
         if data:
+            cache_hits_counter.inc()
             return json.loads(data)
+        else:
+            cache_misses_counter.inc()
     except Exception as e:
         print(f"Cache read error: {e}")
     

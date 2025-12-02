@@ -123,6 +123,35 @@ resource "aws_ecs_service" "search_api" {
 }
 
 ########################################
+# Autoscaling for Search API
+########################################
+
+resource "aws_appautoscaling_target" "search_api" {
+  max_capacity       = var.search_api_max_count
+  min_capacity       = var.search_api_min_count
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.search_api.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "search_api_cpu" {
+  name               = "${var.project_name}-search-api-cpu-${var.environment}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.search_api.resource_id
+  scalable_dimension = aws_appautoscaling_target.search_api.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.search_api.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = var.search_api_cpu_target
+    scale_in_cooldown  = var.search_api_scale_in_cooldown
+    scale_out_cooldown = var.search_api_scale_out_cooldown
+  }
+}
+
+########################################
 # Book Detail API ECS Service
 ########################################
 
@@ -393,10 +422,45 @@ resource "aws_ecs_service" "recommendation_api" {
     assign_public_ip = false
   }
 
+  load_balancer {
+    target_group_arn = var.recommendation_api_target_group_arn
+    container_name   = "recommendation-api"
+    container_port   = 8000
+  }
+
   tags = {
     Name        = "${var.project_name}-recommendation-api-service"
     Environment = var.environment
     Project     = var.project_name
+  }
+}
+
+########################################
+# Autoscaling for Recommendation API
+########################################
+
+resource "aws_appautoscaling_target" "recommendation_api" {
+  max_capacity       = var.recommendation_api_max_count
+  min_capacity       = var.recommendation_api_min_count
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.recommendation_api.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "recommendation_api_cpu" {
+  name               = "${var.project_name}-recommendation-api-cpu-${var.environment}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.recommendation_api.resource_id
+  scalable_dimension = aws_appautoscaling_target.recommendation_api.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.recommendation_api.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = var.recommendation_api_cpu_target
+    scale_in_cooldown  = var.recommendation_api_scale_in_cooldown
+    scale_out_cooldown = var.recommendation_api_scale_out_cooldown
   }
 }
 

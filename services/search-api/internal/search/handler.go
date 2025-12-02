@@ -1,8 +1,10 @@
 package search
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
@@ -137,6 +139,73 @@ func (h *Handler) GetCompositeShard(c *gin.Context) {
 }
 
 // =============================
+// NEW: SHARDED AGGREGATOR
+// GET /search/sharded?query=...&limit=...
+// Fans out to 26 shards (A–Z) in parallel using SearchShard
+// Adds phase timing headers: X-Phase-Parse, X-Phase-Fanout, X-Phase-Aggregate (ms)
+// =============================
+
+// GET /search/sharded
+func (h *Handler) GetSharded(c *gin.Context) {
+	start := nowMs()
+	q := strings.TrimSpace(c.Query("query"))
+	limit := parseLimit(c.Query("limit"), 20)
+	parseDone := nowMs()
+
+	if q == "" {
+		c.JSON(http.StatusBadRequest, errJSON("invalid_request", "query is required"))
+		return
+	}
+
+	type shardResp struct {
+		items []BookDTO
+		err   error
+	}
+
+	results := make(chan shardResp, 26)
+	letters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	for i := 0; i < len(letters); i++ {
+		prefix := string(letters[i])
+		go func(pref string) {
+			items, err := h.store.SearchShard(pref, q, limit)
+			results <- shardResp{items: items, err: err}
+		}(prefix)
+	}
+
+	all := make([]BookDTO, 0, limit*2)
+	for i := 0; i < 26; i++ {
+		r := <-results
+		if r.err != nil {
+			// continue on error; aggregator remains best-effort
+			continue
+		}
+		all = append(all, r.items...)
+	}
+	fanoutDone := nowMs()
+
+	// Deduplicate by BookID and trim to limit
+	seen := make(map[string]struct{}, len(all))
+	out := make([]BookDTO, 0, limit)
+	for _, b := range all {
+		if _, ok := seen[b.BookID]; ok {
+			continue
+		}
+		seen[b.BookID] = struct{}{}
+		out = append(out, b)
+		if len(out) >= limit {
+			break
+		}
+	}
+
+	aggregateDone := nowMs()
+
+	c.Header("X-Phase-Parse", msToHeader(parseDone-start))
+	c.Header("X-Phase-Fanout", msToHeader(fanoutDone-parseDone))
+	c.Header("X-Phase-Aggregate", msToHeader(aggregateDone-fanoutDone))
+	c.JSON(http.StatusOK, gin.H{"count": len(out), "items": out})
+}
+
+// =============================
 // Helper functions
 // =============================
 
@@ -162,3 +231,13 @@ func parseLimit(s string, d int) int {
 }
 
 func errJSON(code, msg string) gin.H { return gin.H{"error": code, "message": msg} }
+
+// simple millis using std time
+func nowMs() int64 { return time.Now().UnixNano() / 1e6 }
+
+func msToHeader(ms int64) string {
+	if ms < 0 {
+		ms = 0
+	}
+	return fmt.Sprintf("%d", ms)
+}

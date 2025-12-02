@@ -103,6 +103,33 @@ resource "aws_lb_target_group" "ratings_api" {
   }
 }
 
+# Recommendation API Target Group
+resource "aws_lb_target_group" "recommendation_api" {
+  name        = "book-reco-${var.environment}"
+  port        = var.recommendation_api_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    path                = "/health"
+    matcher             = "200"
+  }
+
+  deregistration_delay = 30
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-tg"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
 # HTTP Listener with path-based routing
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
@@ -146,6 +173,29 @@ resource "aws_lb_listener_rule" "search_api" {
 
   tags = {
     Name        = "${var.project_name}-search-api-rule"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Recommendation API routing
+resource "aws_lb_listener_rule" "recommendation_api" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 140
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.recommendation_api.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/recommendations*", "/recommendations/*"]
+    }
+  }
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-rule"
     Environment = var.environment
     Project     = var.project_name
   }

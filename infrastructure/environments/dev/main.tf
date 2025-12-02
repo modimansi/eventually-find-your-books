@@ -83,6 +83,7 @@ module "alb" {
   search_api_port      = var.search_api_port
   bookdetail_api_port  = var.bookdetail_api_port
   ratings_api_port     = var.ratings_api_port
+  recommendation_api_port = var.recommendation_api_port
 }
 
 # CloudWatch Log Groups
@@ -121,6 +122,7 @@ module "ecs" {
   bookdetail_api_target_group_arn = module.alb.bookdetail_api_target_group_arn
   ratings_api_target_group_arn  = module.alb.ratings_api_target_group_arn
   alb_listener_arn              = module.alb.http_listener_arn
+  recommendation_api_target_group_arn = module.alb.recommendation_api_target_group_arn
   
   # CloudWatch
   search_api_log_group_name     = module.monitoring.search_api_log_group_name
@@ -140,6 +142,12 @@ module "ecs" {
   search_api_cpu                = var.search_api_cpu
   search_api_memory             = var.search_api_memory
   search_api_desired_count      = var.search_api_desired_count
+  # Search autoscaling
+  search_api_min_count          = var.search_api_min_count
+  search_api_max_count          = var.search_api_max_count
+  search_api_cpu_target         = var.search_api_cpu_target
+  search_api_scale_in_cooldown  = var.search_api_scale_in_cooldown
+  search_api_scale_out_cooldown = var.search_api_scale_out_cooldown
   
   bookdetail_api_port           = var.bookdetail_api_port
   bookdetail_api_cpu            = var.bookdetail_api_cpu
@@ -150,5 +158,12 @@ module "ecs" {
   ratings_api_cpu               = var.ratings_api_cpu
   ratings_api_memory            = var.ratings_api_memory
   ratings_api_desired_count     = var.ratings_api_desired_count
+
+  # Recommendation autoscaling
+  recommendation_api_min_count        = var.recommendation_api_min_count
+  recommendation_api_max_count        = var.recommendation_api_max_count
+  recommendation_api_cpu_target       = var.recommendation_api_cpu_target
+  recommendation_api_scale_in_cooldown  = var.recommendation_api_scale_in_cooldown
+  recommendation_api_scale_out_cooldown = var.recommendation_api_scale_out_cooldown
 }
 

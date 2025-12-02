@@ -39,6 +39,9 @@ func main() {
 	// NEW: composite sharding endpoint, e.g. /search/composite/T1, /search/composite/I-M
 	r.GET("/search/composite/:shard", h.GetCompositeShard)
 
+	// NEW: fan-out aggregator across all 26 shards
+	r.GET("/search/sharded", h.GetSharded)
+
 	// Health check endpoint
 	r.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
 

@@ -77,6 +77,11 @@ variable "ratings_api_target_group_arn" {
   type        = string
 }
 
+variable "recommendation_api_target_group_arn" {
+  description = "ARN of the Recommendation API target group"
+  type        = string
+}
+
 variable "alb_listener_arn" {
   description = "ARN of the ALB listener"
   type        = string
@@ -170,6 +175,70 @@ variable "ratings_api_memory" {
 variable "ratings_api_desired_count" {
   description = "Desired number of ratings API tasks"
   type        = number
+}
+
+########################################
+# Search API autoscaling
+########################################
+variable "search_api_min_count" {
+  description = "Minimum number of Search API tasks"
+  type        = number
+  default     = 2
+}
+
+variable "search_api_max_count" {
+  description = "Maximum number of Search API tasks"
+  type        = number
+  default     = 10
+}
+
+variable "search_api_cpu_target" {
+  description = "Target average CPU utilization (%) for Search API autoscaling"
+  type        = number
+  default     = 60
+}
+
+variable "search_api_scale_in_cooldown" {
+  description = "Scale-in cooldown seconds for Search API"
+  type        = number
+  default     = 120
+}
+
+variable "search_api_scale_out_cooldown" {
+  description = "Scale-out cooldown seconds for Search API"
+  type        = number
+  default     = 60
+}
+
+# Recommendation API autoscaling
+variable "recommendation_api_min_count" {
+  description = "Minimum number of recommendation API tasks"
+  type        = number
+  default     = 1
+}
+
+variable "recommendation_api_max_count" {
+  description = "Maximum number of recommendation API tasks"
+  type        = number
+  default     = 5
+}
+
+variable "recommendation_api_cpu_target" {
+  description = "Target average CPU utilization (%) for recommendation API autoscaling"
+  type        = number
+  default     = 60
+}
+
+variable "recommendation_api_scale_in_cooldown" {
+  description = "Scale-in cooldown seconds for recommendation API"
+  type        = number
+  default     = 120
+}
+
+variable "recommendation_api_scale_out_cooldown" {
+  description = "Scale-out cooldown seconds for recommendation API"
+  type        = number
+  default     = 60
 }
 
 # Redis Cache

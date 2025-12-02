@@ -38,3 +38,8 @@ variable "ratings_api_port" {
   type        = number
 }
 
+variable "recommendation_api_port" {
+  description = "Port for recommendation API"
+  type        = number
+}
+
