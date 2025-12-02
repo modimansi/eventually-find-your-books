@@ -16,9 +16,11 @@ def build_matrix(ratings: List[Dict]):
         u = r['user_id']
         i = r['book_id']
         if u not in users:
-            users[u] = user_idx; user_idx += 1
+            users[u] = user_idx
+            user_idx += 1
         if i not in items:
-            items[i] = item_idx; item_idx += 1
+            items[i] = item_idx
+            item_idx += 1
 
     mat = np.zeros((len(users), len(items)), dtype=float)
     for r in ratings:
@@ -72,5 +74,5 @@ def most_popular_items(ratings: List[Dict], top_k=10) -> List[str]:
         counts[b] = counts.get(b, 0) + 1
         sum_r[b] = sum_r.get(b, 0) + float(r['rating'])
     # sort by count then avg rating
-    items = sorted(counts.keys(), key=lambda b: (-counts[b], -sum_r[b]/counts[b]))
+    items = sorted(counts.keys(), key=lambda w: (-counts[w], -sum_r[w]/counts[w]))
     return items[:top_k]
