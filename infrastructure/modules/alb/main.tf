@@ -201,6 +201,29 @@ resource "aws_lb_listener_rule" "recommendation_api" {
   }
 }
 
+# Forward /metrics to recommendation API (Prometheus endpoint)
+resource "aws_lb_listener_rule" "recommendation_api_metrics" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 145
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.recommendation_api.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/metrics"]
+    }
+  }
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-metrics-rule"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
 # Ratings API routing - Book ratings endpoints (higher priority to match first)
 resource "aws_lb_listener_rule" "ratings_api_books" {
   listener_arn = aws_lb_listener.http.arn
