@@ -52,6 +52,11 @@ output "ecr_ratings_api_url" {
   value       = module.ecr.ratings_api_repository_url
 }
 
+output "ecr_recommendation_api_url" {
+  description = "URL of the Recommendation API ECR repository"
+  value       = module.ecr.recommendation_api_repository_url
+}
+
 ########################################
 # ECS Outputs
 ########################################
@@ -117,6 +122,11 @@ output "bookdetail_api_log_group" {
 output "ratings_api_log_group" {
   description = "CloudWatch log group for Ratings API"
   value       = module.monitoring.ratings_api_log_group_name
+}
+
+output "recommendation_api_log_group" {
+  description = "CloudWatch log group for Recommendation API"
+  value       = module.monitoring.recommendation_api_log_group_name
 }
 
 ########################################

@@ -322,7 +322,7 @@ resource "aws_ecs_task_definition" "recommendation_api" {
   container_definitions = jsonencode([
     {
       name      = "recommendation-api"
-      image     = "python:3.11-slim"
+      image     = "${var.recommendation_api_repository_url}:latest"
       essential = true
 
       portMappings = [
@@ -339,7 +339,7 @@ resource "aws_ecs_task_definition" "recommendation_api" {
           value = var.aws_region
         },
         {
-          name  = "DYNAMODB_TABLE"
+          name  = "DYNAMODB_TABLE_RATINGS"
           value = var.ratings_table_name
         },
         {
@@ -368,6 +368,8 @@ resource "aws_ecs_task_definition" "recommendation_api" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
+
+      # Use image CMD (uvicorn) from Dockerfile.recommendation
     }
   ])
 

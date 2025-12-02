@@ -48,17 +48,20 @@ echo "Getting ECR repository URLs from Terraform..."
 SEARCH_API_REPO=$(terraform output -raw ecr_search_api_url 2>/dev/null || echo "")
 BOOKDETAIL_API_REPO=$(terraform output -raw ecr_bookdetail_api_url 2>/dev/null || echo "")
 RATINGS_API_REPO=$(terraform output -raw ecr_ratings_api_url 2>/dev/null || echo "")
+RECOMMENDATION_API_REPO=$(terraform output -raw ecr_recommendation_api_url 2>/dev/null || echo "")
 
-if [ -z "$SEARCH_API_REPO" ] || [ -z "$BOOKDETAIL_API_REPO" ] || [ -z "$RATINGS_API_REPO" ]; then
+if [ -z "$SEARCH_API_REPO" ] || [ -z "$BOOKDETAIL_API_REPO" ] || [ -z "$RATINGS_API_REPO" ] || [ -z "$RECOMMENDATION_API_REPO" ]; then
   echo "Warning: Could not get repository URLs from Terraform. Using defaults..."
   SEARCH_API_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME/search-api"
   BOOKDETAIL_API_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME/bookdetail-api"
   RATINGS_API_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME/ratings-api"
+  RECOMMENDATION_API_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME/recommendation-api"
 fi
 
 echo "Search API Repository: $SEARCH_API_REPO"
 echo "Book Detail API Repository: $BOOKDETAIL_API_REPO"
 echo "Ratings API Repository: $RATINGS_API_REPO"
+echo "Recommendation API Repository: $RECOMMENDATION_API_REPO"
 
 # Navigate to services directory using the saved project root
 echo ""
@@ -103,6 +106,17 @@ docker build -t $PROJECT_NAME/ratings-api:latest .
 docker tag $PROJECT_NAME/ratings-api:latest $RATINGS_API_REPO:latest
 docker push $RATINGS_API_REPO:latest
 echo "✓ Ratings API deployed successfully"
+
+# Build and push Recommendation API
+echo ""
+echo "======================================"
+echo "Building and pushing Recommendation API..."
+echo "======================================"
+cd "$PROJECT_ROOT"
+docker build -f Dockerfile.recommendation -t $PROJECT_NAME/recommendation-api:latest .
+docker tag $PROJECT_NAME/recommendation-api:latest $RECOMMENDATION_API_REPO:latest
+docker push $RECOMMENDATION_API_REPO:latest
+echo "✓ Recommendation API deployed successfully"
 
 # Force ECS to redeploy services
 echo ""

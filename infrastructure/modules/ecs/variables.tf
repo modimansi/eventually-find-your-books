@@ -56,6 +56,11 @@ variable "ratings_api_repository_url" {
   type        = string
 }
 
+variable "recommendation_api_repository_url" {
+  description = "URL of the Recommendation API ECR repository"
+  type        = string
+}
+
 # ALB
 variable "search_api_target_group_arn" {
   description = "ARN of the Search API target group"

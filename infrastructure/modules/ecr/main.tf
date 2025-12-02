@@ -125,3 +125,46 @@ resource "aws_ecr_lifecycle_policy" "ratings_api" {
   })
 }
 
+########################################
+# Recommendation API Repository
+########################################
+resource "aws_ecr_repository" "recommendation_api" {
+  name                 = "${var.project_name}/recommendation-api"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  encryption_configuration {
+    encryption_type = "AES256"
+  }
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Lifecycle policy for recommendation API
+resource "aws_ecr_lifecycle_policy" "recommendation_api" {
+  repository = aws_ecr_repository.recommendation_api.name
+
+  policy = jsonencode({
+    rules = [{
+      rulePriority = 1
+      description  = "Keep last 10 images"
+      selection = {
+        tagStatus     = "tagged"
+        tagPrefixList = ["v"]
+        countType     = "imageCountMoreThan"
+        countNumber   = 10
+      }
+      action = {
+        type = "expire"
+      }
+    }]
+  })
+}
+

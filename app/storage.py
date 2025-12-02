@@ -11,7 +11,7 @@ if settings.debug:
 else:
     dynamodb = boto3.resource("dynamodb", region_name=settings.aws_region)
 
-table = dynamodb.Table(settings.dynamodb_table)
+table = dynamodb.Table(settings.dynamodb_table_ratings)
 
 def fetch_all_ratings() -> List[Dict]:
     """Scan DynamoDB table and return all items."""

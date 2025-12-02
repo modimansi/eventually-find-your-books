@@ -13,3 +13,8 @@ output "ratings_api_log_group_name" {
   value       = aws_cloudwatch_log_group.ratings_api.name
 }
 
+output "recommendation_api_log_group_name" {
+  description = "Name of the Recommendation API log group"
+  value       = aws_cloudwatch_log_group.recommendation_api.name
+}
+

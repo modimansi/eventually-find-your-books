@@ -114,6 +114,7 @@ module "ecs" {
   search_api_repository_url     = module.ecr.search_api_repository_url
   bookdetail_api_repository_url = module.ecr.bookdetail_api_repository_url
   ratings_api_repository_url    = module.ecr.ratings_api_repository_url
+  recommendation_api_repository_url = module.ecr.recommendation_api_repository_url
   
   # ALB
   search_api_target_group_arn   = module.alb.search_api_target_group_arn

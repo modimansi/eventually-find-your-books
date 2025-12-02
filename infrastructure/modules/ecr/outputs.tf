@@ -13,3 +13,8 @@ output "ratings_api_repository_url" {
   value       = aws_ecr_repository.ratings_api.repository_url
 }
 
+output "recommendation_api_repository_url" {
+  description = "URL of the Recommendation API ECR repository"
+  value       = aws_ecr_repository.recommendation_api.repository_url
+}
+

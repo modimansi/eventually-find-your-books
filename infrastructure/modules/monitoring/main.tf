@@ -38,3 +38,16 @@ resource "aws_cloudwatch_log_group" "ratings_api" {
   }
 }
 
+# Recommendation API Log Group (matches ECS task definition name)
+resource "aws_cloudwatch_log_group" "recommendation_api" {
+  # ECS task uses: "/ecs/${var.project_name}-recommendation-api-${var.environment}"
+  name              = "/ecs/${var.project_name}-recommendation-api-${var.environment}"
+  retention_in_days = var.log_retention_days
+
+  tags = {
+    Name        = "${var.project_name}-recommendation-api-logs"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
