@@ -10,7 +10,7 @@ resource "aws_dynamodb_table" "books" {
   # Primary key: book_id
   hash_key = "book_id"
 
-  # Attributes (only those used as keys or GSIs must be declared)
+  # Attributes
   attribute {
     name = "book_id"
     type = "S"
@@ -26,7 +26,13 @@ resource "aws_dynamodb_table" "books" {
     type = "S"
   }
 
-  # GSI1: Search by lowercase title (exact or prefix match)
+  # ⭐ Added for composite sharding
+  attribute {
+    name = "shard_key"
+    type = "S"
+  }
+
+  # GSI1: Search by lowercase title
   global_secondary_index {
     name               = "TitleLowerIndex"
     hash_key           = "title_lower"
@@ -35,10 +41,19 @@ resource "aws_dynamodb_table" "books" {
     write_capacity     = 0
   }
 
-  # GSI2: Browse by first-letter prefix (A–Z sharding)
+  # GSI2: Browse by title prefix (A–Z)
   global_secondary_index {
     name               = "TitlePrefixIndex"
     hash_key           = "title_prefix"
+    projection_type    = "ALL"
+    read_capacity      = 0
+    write_capacity     = 0
+  }
+
+  # ⭐ New GSI3: Composite Sharding (T1, I-M, R-U...)
+  global_secondary_index {
+    name               = "ShardIndex"
+    hash_key           = "shard_key"
     projection_type    = "ALL"
     read_capacity      = 0
     write_capacity     = 0
