@@ -42,6 +42,9 @@ func main() {
 	// NEW: fan-out aggregator across all 26 shards
 	r.GET("/search/sharded", h.GetSharded)
 
+	// NEW: fan-out aggregator across 16 composite shards
+	r.GET("/search/composite_sharded", h.GetCompositeSharded)
+
 	// Health check endpoint
 	r.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
 

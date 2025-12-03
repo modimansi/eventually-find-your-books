@@ -206,6 +206,88 @@ func (h *Handler) GetSharded(c *gin.Context) {
 }
 
 // =============================
+// Architecture C: 16-way COMPOSITE SHARDED AGGREGATOR
+// GET /search/composite_sharded?query=...&limit=...
+// Fans out to 16 composite shards (A1/A2/S1/S2/T1/T2/...)
+// using SearchByShard, then aggregates + deduplicates.
+// Also exposes phase timing headers.
+// =============================
+
+func (h *Handler) GetCompositeSharded(c *gin.Context) {
+	start := nowMs()
+	q := strings.TrimSpace(c.Query("query"))
+	limit := parseLimit(c.Query("limit"), 20)
+	parseDone := nowMs()
+
+	if q == "" {
+		c.JSON(http.StatusBadRequest, errJSON("invalid_request", "query is required"))
+		return
+	}
+
+	type shardResp struct {
+		items []BookDTO
+		err   error
+	}
+
+	// Final composite sharding strategy: 16 shards total
+	shardKeys := []string{
+		"A1", "A2",
+		"S1", "S2",
+		"T1", "T2",
+		"C", "L", "M", "P",
+		"BE", "DJK", "FGQX", "HIY", "NOUVZ", "RW",
+		// If you also want to query the fallback shard, uncomment the line below
+		"0",
+	}
+
+	results := make(chan shardResp, len(shardKeys))
+
+	// Concurrently fan out to each composite shard
+	for _, sk := range shardKeys {
+		shardKey := sk // avoid closure capturing the loop variable
+		go func() {
+			items, err := h.store.SearchByShard(shardKey, q, limit)
+			results <- shardResp{items: items, err: err}
+		}()
+	}
+
+	// Collect results from all shards
+	all := make([]BookDTO, 0, limit*2)
+	for i := 0; i < len(shardKeys); i++ {
+		r := <-results
+		if r.err != nil {
+			// best-effort: ignore a shard error so the overall query doesn't fail
+			continue
+		}
+		all = append(all, r.items...)
+	}
+	fanoutDone := nowMs()
+
+	// Deduplicate and truncate to the requested limit
+	seen := make(map[string]struct{}, len(all))
+	out := make([]BookDTO, 0, limit)
+	for _, b := range all {
+		if _, ok := seen[b.BookID]; ok {
+			continue
+		}
+		seen[b.BookID] = struct{}{}
+		out = append(out, b)
+		if len(out) >= limit {
+			break
+		}
+	}
+
+	aggregateDone := nowMs()
+
+	// Like the 26-way aggregator, set timing headers
+	c.Header("X-Phase-Parse", msToHeader(parseDone-start))
+	c.Header("X-Phase-Fanout", msToHeader(fanoutDone-parseDone))
+	c.Header("X-Phase-Aggregate", msToHeader(aggregateDone-fanoutDone))
+
+	c.JSON(http.StatusOK, gin.H{"count": len(out), "items": out})
+}
+
+// =============================
 // Helper functions
 // =============================
 
