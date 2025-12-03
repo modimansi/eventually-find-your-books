@@ -1,0 +1,121 @@
+## Testing Architecture B: /search/sharded
+===== Request 1 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2296
+X-Phase-Parse: 0
+===== Request 2 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2051
+X-Phase-Parse: 0
+===== Request 3 =====
+X-Phase-Aggregate: 1
+X-Phase-Fanout: 2700
+X-Phase-Parse: 0
+===== Request 4 =====
+X-Phase-Aggregate: 1
+X-Phase-Fanout: 2484
+X-Phase-Parse: 0
+===== Request 5 =====
+X-Phase-Aggregate: 1
+X-Phase-Fanout: 2419
+X-Phase-Parse: 0
+===== Request 6 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1910
+X-Phase-Parse: 0
+===== Request 7 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2712
+X-Phase-Parse: 0
+===== Request 8 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2449
+X-Phase-Parse: 0
+===== Request 9 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2521
+X-Phase-Parse: 0
+===== Request 10 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1819
+X-Phase-Parse: 0
+===== Request 11 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1939
+X-Phase-Parse: 0
+===== Request 12 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1868
+X-Phase-Parse: 0
+===== Request 13 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2530
+X-Phase-Parse: 0
+===== Request 14 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1728
+X-Phase-Parse: 0
+===== Request 15 =====
+X-Phase-Aggregate: 1
+X-Phase-Fanout: 1969
+X-Phase-Parse: 0
+===== Request 16 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2298
+X-Phase-Parse: 1
+===== Request 17 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1748
+X-Phase-Parse: 0
+===== Request 18 =====
+X-Phase-Aggregate: 1
+X-Phase-Fanout: 1935
+X-Phase-Parse: 0
+===== Request 19 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1490
+X-Phase-Parse: 0
+===== Request 20 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2032
+X-Phase-Parse: 0
+===== Request 21 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1309
+X-Phase-Parse: 0
+===== Request 22 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2267
+X-Phase-Parse: 0
+===== Request 23 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2048
+X-Phase-Parse: 0
+===== Request 24 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1963
+X-Phase-Parse: 0
+===== Request 25 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2224
+X-Phase-Parse: 0
+===== Request 26 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1794
+X-Phase-Parse: 0
+===== Request 27 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2357
+X-Phase-Parse: 0
+===== Request 28 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2038
+X-Phase-Parse: 0
+===== Request 29 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 2325
+X-Phase-Parse: 0
+===== Request 30 =====
+X-Phase-Aggregate: 0
+X-Phase-Fanout: 1952
+X-Phase-Parse: 0
