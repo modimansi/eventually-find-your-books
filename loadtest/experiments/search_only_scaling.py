@@ -41,7 +41,7 @@ class SearchOnlyUser(HttpUser):
     Query mix: 60% popular, 40% rare.
     """
 
-    host = os.getenv("LOCUST_HOST", "http://book-alb-dev-1967393761.us-west-2.elb.amazonaws.com")
+    host = os.getenv("LOCUST_HOST", "http://book-alb-dev-1531276943.us-west-2.elb.amazonaws.com")
     wait_time = constant(0)
 
     @task
