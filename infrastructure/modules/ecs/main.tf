@@ -377,7 +377,7 @@ resource "aws_ecs_task_definition" "recommendation_api" {
         },
         {
           name  = "CACHE_TTL_SECONDS"
-          value = "600"
+          value = "60"
         },
         {
           name  = "DEBUG"

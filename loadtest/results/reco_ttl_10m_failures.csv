@@ -1,2 +1,0 @@
-Method,Name,Error,Occurrences
-GET,/recommendations/:user_id,HTTPError('504 Server Error: Gateway Time-out for url: /recommendations/:user_id'),218

@@ -57,7 +57,7 @@ class RecommendationsUser(HttpUser):
     80% of requests target "TOP_USERS" (hot keys), 20% target "LONG_TAIL_USERS" (cold/rare).
     """
 
-    host = os.getenv("LOCUST_HOST", "http://book-alb-dev-1967393761.us-west-2.elb.amazonaws.com")
+    host = os.getenv("LOCUST_HOST", "http://book-alb-dev-905356730.us-west-2.elb.amazonaws.com")
     wait_time = constant(WAIT_SECONDS)
 
     @task

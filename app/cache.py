@@ -1,10 +1,9 @@
 import asyncio
 import json
 from app.config import settings
-from prometheus_client import Counter
+from prometheus_client import Counter, Gauge
 
 redis = None
-redis_available = True
 
 # Prometheus counters (process-level, aggregated across requests)
 cache_hits_counter = Counter(
@@ -15,47 +14,43 @@ cache_misses_counter = Counter(
     "reco_cache_misses_total",
     "Total number of recommendation cache misses"
 )
+redis_up_gauge = Gauge(
+    "reco_redis_up",
+    "Redis connectivity status (1=up, 0=down)"
+)
 
 async def get_redis():
     """Get Redis connection, or None if Redis is unavailable"""
-    global redis, redis_available
-    
-    if not redis_available:
-        return None
-    
+    global redis
+
     if redis is None:
         try:
             import redis.asyncio as aioredis
-            redis = aioredis.from_url(settings.redis_url, decode_responses=True)
+            candidate = aioredis.from_url(settings.redis_url, decode_responses=True)
             # Test connection
-            await redis.ping()
+            await candidate.ping()
+            redis = candidate
+            redis_up_gauge.set(1)
             print(f"✅ Redis connected: {settings.redis_url}")
         except Exception as e:
+            # Keep redis as None so we'll retry next time
+            redis = None
+            redis_up_gauge.set(0)
             print("\n" + "="*70)
             print("⚠️  WARNING: Redis is NOT available!")
             print("="*70)
             print(f"Error: {e}")
-            print("\n🔴 PERFORMANCE IMPACT:")
-            print("  • Every request will be SLOW (2-5 seconds)")
-            print("  • Every request will scan DynamoDB (expensive)")
-            print("  • System cannot handle concurrent users")
-            print("\n💡 TO FIX (choose one):")
-            print("  1. Start Redis via Docker:")
-            print("     docker run -d -p 6379:6379 redis:alpine")
-            print("  2. Start Redis via docker-compose:")
-            print("     docker-compose up -d redis")
-            print("  3. Install Redis locally:")
-            print("     Windows: https://redis.io/docs/install/install-redis/")
             print("="*70 + "\n")
-            redis_available = False
-            redis = None
-    
+            return None
+
     return redis
 
 async def get_cached_recommendations(user_id: str):
     """Get cached recommendations if Redis is available"""
     r = await get_redis()
     if r is None:
+        # Treat as miss since we couldn't use cache
+        cache_misses_counter.inc()
         return None
     
     try:

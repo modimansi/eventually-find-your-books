@@ -10,7 +10,8 @@ def compute_recommendations_for_user_sync(user_id: str, limit: int = 10):
 async def get_recommendations(user_id: str, limit: int = 10):
     # Try cache first
     cached = await cache.get_cached_recommendations(user_id)
-    if cached:
+    # Treat empty lists as valid cached results
+    if cached is not None:
         return cached[:limit]
 
     # Compute (run sync in threadpool)
